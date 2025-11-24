@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sathishfoodpark - Smart Restaurant Billing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/styles.css" />
+</head>
+
+<body>
+    <header class="hero">
+        <div class="hero__copy">
+            <p class="eyebrow">South Indian Kitchen</p>
+            <h1>Sathish FoodPark Restaurant 🏨</h1>
+            <p class="lede">
+                Tap-to-serve digital menu, instant billing and QR powered payments for
+                a lightning-fast dine-in experience.
+            </p>
+            <div class="hero__actions">
+                <button id="quickAddBtn" class="btn btn--ghost"
+                    style="color: beige; background-color: rgb(220, 79, 236);">
+                    Add Today's Special
+                </button>
+                <button id="manageMenuBtn" class="btn">Manage Menu</button>
+            </div>
+        </div>
+        <div class="hero__stats">
+            <div class="stat-card">
+                <p class="label">Today's Orders</p>
+                <p id="statOrders" class="value">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="label">Revenue (₹)</p>
+                <p id="statRevenue" class="value">0.00</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="panel">
+            <div class="panel__heading">
+                <div>
+                    <p class="eyebrow">Menu Board</p>
+                    <h2>Tap to add into bill</h2>
+                </div>
+                <label class="search">
+                    <span class="sr-only">Search menu</span>
+                    <input type="search" id="menuSearch" placeholder="Search idly, dosa, beverages..." />
+                </label>
+            </div>
+            <div id="menuGrid" class="menu-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="panel grid">
+            <div class="card">
+                <div class="panel__heading">
+                    <div>
+                        <p class="eyebrow">Active Table</p>
+                        <h2>Billing Cart</h2>
+                    </div>
+                    <button id="clearCartBtn" class="btn btn--ghost">
+                        Clear Cart
+                    </button>
+                </div>
+                <div id="cartEmpty" class="empty-state">
+                    <p>Select dishes from the menu to start billing.</p>
+                </div>
+                <ul id="cartItems" class="cart-list"></ul>
+                <div class="totals">
+                    <div>
+                        <span>Items</span>
+                        <strong id="cartItemCount">0</strong>
+                    </div>
+                    <div>
+                        <span>Subtotal</span>
+                        <strong id="cartSubtotal">₹0.00</strong>
+                    </div>
+                    <div>
+                        <span>GST (5%)</span>
+                        <strong id="cartTax">₹0.00</strong>
+                    </div>
+                    <div class="grand-total">
+                        <span>Total</span>
+                        <strong id="cartTotal">₹0.00</strong>
+                    </div>
+                </div>
+                <div class="cart-actions">
+                    <button id="printBillBtn" class="btn btn--ghost">Print Bill</button>
+                    <button id="payNowBtn" class="btn btn--primary">Pay Now</button>
+                </div>
+            </div>
+            <div class="card report">
+                <div class="panel__heading">
+                    <div>
+                        <p class="eyebrow">Performance</p>
+                        <h2>Monthly Sales</h2>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <select id="monthPicker" aria-label="Select month for report"></select>
+                        <button id="exportExcelBtn" class="btn btn--ghost" title="Download Excel">
+                            📥 Excel
+                        </button>
+                    </div>
+                </div>
+                <div class="report__summary">
+                    <article>
+                        <p>Revenue</p>
+                        <strong id="reportRevenue">₹0.00</strong>
+                    </article>
+                    <article>
+                        <p>Orders</p>
+                        <strong id="reportOrders">0</strong>
+                    </article>
+                    <article>
+                        <p>Avg. Ticket</p>
+                        <strong id="reportAverage">₹0.00</strong>
+                    </article>
+                </div>
+                <div class="report__table-wrapper">
+                    <table class="report__table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportRows">
+                            <tr>
+                                <td colspan="3" class="empty">No bills recorded yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© <span id="year"></span> Sathish FoodPark . Built for super-fast service.</p>
+    </footer>
+
+    <section id="menuModal" class="modal" aria-hidden="true">
+        <div class="modal__backdrop" data-close></div>
+        <div class="modal__panel" role="dialog" aria-modal="true">
+            <header>
+                <h3>Manage Menu</h3>
+                <button class="icon-btn" data-close aria-label="Close modal">×</button>
+            </header>
+            <div class="modal__content">
+                <div class="modal__list">
+                    <h4>Current Items</h4>
+                    <ul id="menuAdminList" class="admin-list"></ul>
+                </div>
+                <div class="modal__form">
+                    <h4 id="menuFormTitle">Add New Item</h4>
+                    <form id="menuForm">
+                        <input type="hidden" id="menuItemId" />
+                        <label>
+                            Item name
+                            <input type="text" id="menuItemName" required />
+                        </label>
+                        <label>
+                            Price (₹)
+                            <input type="number" step="0.5" min="1" id="menuItemPrice" required />
+                        </label>
+                        <label>
+                            Category
+                            <input type="text" id="menuItemCategory" placeholder="Breakfast" />
+                        </label>
+                        <label>
+                            Image (Upload or URL)
+                            <input type="file" id="menuItemImageFile" accept="image/*" />
+                            <input type="url" id="menuItemImage" placeholder="Or enter image URL: https://..." />
+                            <div id="imagePreview"></div>
+                        </label>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary" id="saveMenuItem">
+                                Save Item
+                            </button>
+                            <button type="button" class="btn btn--ghost" id="resetMenuForm">
+                                Reset
+                            </button>
+                            <button type="button" class="btn btn--danger" id="deleteMenuItem">
+                                Delete
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="qrModal" class="modal" aria-hidden="true">
+        <div class="modal__backdrop" data-close></div>
+        <div class="modal__panel modal__panel--narrow" role="dialog" aria-modal="true">
+            <header>
+                <h3>Scan & Pay</h3>
+                <button class="icon-btn" data-close aria-label="Close modal">×</button>
+            </header>
+            <div class="qr">
+                <img id="qrImage" src="./assets/qr-code.jpg" alt="UPI QR code" width="350" height="250" />
+                <p>Show this to guest to finish payment.</p>
+                <div class="qr__actions">
+                    <button id="confirmPaymentBtn" class="btn btn--primary">
+                        Confirm Payment
+                    </button>
+                    <button class="btn btn--ghost" data-close>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="printableBill" class="ticket" aria-hidden="true">
+        <h2>Satishfoodpark-Restaurant</h2>
+        <p class="ticket__meta">
+            Bill #: <span id="ticketNumber"></span> ·
+            <span id="ticketDate"></span>
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody id="ticketRows"></tbody>
+        </table>
+        <div class="ticket__totals">
+            <div><span>Subtotal</span><strong id="ticketSubtotal"></strong></div>
+            <div><span>GST 5%</span><strong id="ticketTax"></strong></div>
+            <div class="grand">
+                <span>Total</span><strong id="ticketTotal"></strong>
+            </div>
+        </div>
+        <p class="ticket__thanks">Thank you! Visit again.</p>
+    </section>
+
+    <script src="./js/app.js"></script>
+</body>
+
+</html>
